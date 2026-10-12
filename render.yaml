@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: arras-open-server
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /isOnline
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
