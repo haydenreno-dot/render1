@@ -262,7 +262,42 @@ const THEME_V1_MAGIC = "\x6a\xba\xda\xb3\xf0";
 
         // Game start stuff
         document.getElementById("startButton").onclick = () => startGame();
-        document.onkeydown = (e) => {
+        // Developer access dialog: Ctrl+Shift+Alt+P. Server validates the token.
+    function showDeveloperTokenDialog() {
+        if (document.getElementById("arrasDeveloperTokenOverlay")) return;
+        const overlay = document.createElement("div");
+        overlay.id = "arrasDeveloperTokenOverlay";
+        overlay.style.cssText = "position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;font-family:Arial,sans-serif";
+        overlay.innerHTML = '<form id="arrasDeveloperTokenForm" style="width:min(420px,90vw);box-sizing:border-box;background:#20242b;color:#fff;padding:24px;border-radius:12px;box-shadow:0 8px 35px #000"><h2 style="margin:0 0 10px">Developer access</h2><p style="margin:0 0 16px">Enter your developer token to unlock developer features.</p><input id="arrasDeveloperTokenValue" type="password" autocomplete="off" placeholder="Developer token" style="box-sizing:border-box;width:100%;padding:12px;border-radius:6px;border:1px solid #777;margin-bottom:12px;background:#111;color:#fff"><div id="arrasDeveloperTokenStatus" role="status" style="min-height:20px;margin-bottom:12px"></div><div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" id="arrasDeveloperTokenCancel">Cancel</button><button type="submit">Verify token</button></div></form>';
+        document.body.appendChild(overlay);
+        const form = overlay.querySelector("#arrasDeveloperTokenForm");
+        const input = overlay.querySelector("#arrasDeveloperTokenValue");
+        const status = overlay.querySelector("#arrasDeveloperTokenStatus");
+        overlay.querySelector("#arrasDeveloperTokenCancel").onclick = () => overlay.remove();
+        overlay.onclick = ev => { if (ev.target === overlay) overlay.remove(); };
+        form.onsubmit = async ev => {
+            ev.preventDefault(); status.textContent = "Checking token…";
+            try {
+                const response = await fetch("/api/verifyDeveloper", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({token:input.value}) });
+                const result = await response.json();
+                if (result.valid) {
+                    sessionStorage.setItem("arrasDeveloperVerified", "1");
+                    status.textContent = "Developer token accepted for this session.";
+                    status.style.color = "#8f8";
+                    setTimeout(() => overlay.remove(), 700);
+                    window.dispatchEvent(new CustomEvent("arrasDeveloperVerified"));
+                } else { status.textContent = "Invalid token. Developer features remain locked."; status.style.color = "#ff9999"; input.select(); }
+            } catch { status.textContent = "Could not verify token. Check that the game server is updated."; status.style.color = "#ff9999"; }
+        };
+        input.focus();
+    }
+    document.addEventListener("keydown", e => {
+        if (e.code === "KeyP" && e.ctrlKey && e.shiftKey && e.altKey && !e.repeat) {
+            e.preventDefault(); e.stopPropagation(); showDeveloperTokenDialog();
+        }
+    }, true);
+
+    document.onkeydown = (e) => {
             if (!(global.gameStart || e.shiftKey || e.ctrlKey || e.altKey)) {
                 keybinderHandler.triggerKey(e);
                 let key = e.code;

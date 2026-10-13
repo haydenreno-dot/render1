@@ -340,7 +340,7 @@
                                         </td>
                                     </tr>
                                 </table>
-                                <input type="text" class="conceal" tabindex="3" placeholder="Enter token or type dev and press Enter" id="playerKeyInput" maxlength="512" />
+                                <input type="text" class="conceal" tabindex="3" placeholder="Insert token here" id="playerKeyInput" maxlength="64" />
                             </div>
                             <div id="tabControls">
                                 <div class="horizontalSelector" id="controlsMenuTabs">
@@ -803,46 +803,6 @@
     <script type="module" src="./client/color.js"></script>
     <script type="module" src="./client/serverSelectorHandler.js"></script>
     <script type="module" src="./client/keybindsHandler.js"></script>
-
-    <script>
-        (() => {
-            const tokenInput = document.getElementById("playerKeyInput");
-            if (!tokenInput) return;
-
-            function askForDeveloperToken() {
-                if (tokenInput.value.trim().toLowerCase() !== "dev") return true;
-
-                const token = window.prompt("Enter your developer token:");
-                if (!token || !token.trim()) {
-                    tokenInput.value = "";
-                    localStorage.setItem("playerKeyInputValue", "");
-                    return false;
-                }
-
-                tokenInput.value = token.trim().slice(0, 512);
-                localStorage.setItem("playerKeyInputValue", tokenInput.value);
-                return true;
-            }
-
-            tokenInput.addEventListener("keydown", (event) => {
-                if (event.key === "Enter" && tokenInput.value.trim().toLowerCase() === "dev") {
-                    event.preventDefault();
-                    askForDeveloperToken();
-                }
-            });
-
-            const playButton = document.getElementById("startButton");
-            if (playButton) {
-                playButton.addEventListener("click", (event) => {
-                    if (tokenInput.value.trim().toLowerCase() === "dev" && !askForDeveloperToken()) {
-                        event.preventDefault();
-                        event.stopImmediatePropagation();
-                    }
-                }, true);
-            }
-        })();
-    </script>
-
 </body>
 
 </html>

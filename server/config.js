@@ -1,43 +1,176 @@
 module.exports = {
-    // Public / Render
-    index: "index.html",
-    // Render supplies RENDER_EXTERNAL_HOSTNAME and PORT at runtime.
-    // Locally, this falls back to localhost:3000.
-    host: process.env.RENDER_EXTERNAL_HOSTNAME || `localhost:${Number(process.env.PORT || 3000)}`,
-    port: Number(process.env.PORT || 3000),
+    // Public
+    index: "index.html", // Where the main menu is located (in the /public folder).
+    host: "localhost:3000", // Web server domain. If the host is 'localhost:NUMBER', the NUMBER must be the port setting.
+    port: 3000, // Which port to run the web server on.
 
     // Server
-    broadcast_divisor: 1,
-    load_all_mockups: false,
-    verbose_logs: false,
-    visible_list_interval: 250,
-    delta_entities: false,
-    editor: true,
+    broadcast_divisor: 1, // How often to send entity/camera updates, in ticks. 1 = every tick.
+    load_all_mockups: false, // Set to true if you want every mockup to be loaded when the server starts. May noticeably slow down server startup.
+    verbose_logs: false, // Enable detailed startup logs and log speed loop warnings in the terminal.
+    visible_list_interval: 250, // How often to update the list of the entities that players can see. Has effects of when entities are activated.
+    delta_entities: false, // Send entity updates as created/changed/removed lists instead of a full snapshot every packet.
+    editor: true, // Enable the editor at '[host]/ext/editor'.
 
-    // Render exposes one public port, so the FFA game server shares the
-    // same HTTP/WebSocket endpoint as the main server.
+    /* SERVER PROPERTIES INFORMATION - Make sure to change the host, port and id between servers!
+
+        share_client_server - Forces your server to share the same host and port as the client. (by default, 3000)
+        - Only one server at a time can have this enabled.
+        - This is REQUIRED if your server host doesn't support multi-ports and forces everything through the main server.
+
+        host        - Server host location.
+        port        - The port on the server.
+        id          - (<host>/#<id>)
+
+        region      - The region tab the server is sorted into on the main menu.
+        serverhost  - The host of the server in the server list tooltip.
+        location    - The location of the server in the server list tooltip.
+
+        gamemode    - The selected gamemode.
+        player_cap  - Not including bots. Set to 0 to disable.
+
+        featured    - Whether the server is featured or not.
+        unlisted    - Whether the server shows up in the server list (if its id isn't in the url).
+        private     - Whether the server requires a privileged token to join (except through server travel).
+
+        properties  - This overrides other settings in this file, assuming the selected gamemode doesn't also override it.
+    
+    */
+
     servers: [
         {
-            share_client_server: true,
-            host: process.env.RENDER_EXTERNAL_HOSTNAME || `localhost:${Number(process.env.PORT || 3000)}`,
-            port: Number(process.env.PORT || 3000),
+            share_client_server: false,
+            host: "localhost:3001",
+            port: 3001,
             id: "la",
-            region: "USA",
-            serverhost: "Arras Open",
-            location: "Render",
+
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
             gamemode: ["ffa"],
             player_cap: 80,
-            featured: true,
+
+            featured: false,
             unlisted: false,
             private: false,
+
             properties: {
-                bot_cap: 20
+                bot_cap: 20,
+                daily_tank: {
+                    tank: "whirlwind",
+                    tier: 3,
+                    ads: true,
+                    ad_sources: [
+                        {
+                            file: "example_video_ad.mp4",
+                            use_regular_ad_size: true
+                        },
+                        {
+                            file: "example_image_ad.png",
+                            use_regular_ad_size: true
+                        }
+                    ]
+                }
             }
+        },
+        {
+            share_client_server: false,
+            host: "localhost:3002",
+            port: 3002,
+            id: "lb",
+
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
+            gamemode: ["maze"],
+            player_cap: 80,
+
+            featured: false,
+            unlisted: false,
+            private: false,
+
+            properties: {
+                allow_server_travel: true
+            }
+        },
+        {
+            share_client_server: false,
+            host: "localhost:3003",
+            port: 3003,
+            id: "lc",
+
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
+            gamemode: ["tdm"],
+            player_cap: 80,
+
+            featured: false,
+            unlisted: false,
+            private: false,
+
+            properties: {
+                teams: 2,
+                bot_cap: 20,
+                server_travel_properties: {
+                    loop_interval: 10_000, // how often the portal loop executes in seconds
+                    portals: 1 // amount of portals to spawn
+                },
+                server_travel: [
+                    {
+                        ip: "localhost:3002", // destination server host, don't add "https://" or any slashes to it
+                        portal_properties: {
+                            spawn_chance: 3, // chance for a portal to spawn somewhere in the map each loop iteration (higher = lower chances, lower = higher chance)
+                            color: "red" // portal color
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            share_client_server: false,
+            host: "localhost:3004",
+            port: 3004,
+            id: "ld",
+
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
+            gamemode: ["mothership"],
+            player_cap: 80,
+
+            featured: false,
+            unlisted: false,
+            private: false,
+
+            properties: {
+                mothership_time_limit: 30_000,
+                teams: 3,
+                bot_cap: 30
+            }
+        },
+        {
+            share_client_server: false,
+            host: "localhost:3099",
+            port: 3099,
+            id: "lz",
+
+            region: "Local",
+            serverhost: "Local",
+            location: "Localhost",
+            gamemode: ["sandbox"],
+            player_cap: 80,
+
+            featured: false,
+            unlisted: false,
+            private: false,
+
+            properties: {}
         }
     ],
 
     // Web Server
-    allow_ACAO: true, // Access-Control-Allow-Origin, allows any server/client to access data from the web server.
+    allow_ACAO: false, // Access-Control-Allow-Origin, allows any server/client to access data from the web server.
 
     // Map
     map_tile_width: 420,

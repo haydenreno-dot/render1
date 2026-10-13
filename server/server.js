@@ -79,6 +79,23 @@ if (process.env.API_KEY === "ChangeAPIKeyNow!") {
 
 // Create an HTTP server to handle both API and static file requests
 server = http.createServer((req, res) => {
+    // Developer token verification endpoint. The secret remains server-side.
+    if (req.method === "POST" && req.url === "/api/verifyDeveloper") {
+        let body = "";
+        req.on("data", chunk => { body += chunk; if (body.length > 4096) req.destroy(); });
+        req.on("end", () => {
+            let supplied = "";
+            try { supplied = String(JSON.parse(body).token || ""); } catch {}
+            const expected = String(process.env.DEVELOPER || "");
+            let valid = false;
+            if (expected && supplied && expected.length === supplied.length) {
+                try { valid = require("crypto").timingSafeEqual(Buffer.from(supplied), Buffer.from(expected)); } catch {}
+            }
+            res.writeHead(200, { "Content-Type": "application/json", "Cache-Control": "no-store" });
+            res.end(JSON.stringify({ valid }));
+        });
+        return;
+    }
     let query = {};
     let pathname = req.url.split("?")[0];
     if (req.url.includes("?")) {
